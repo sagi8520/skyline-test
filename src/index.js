@@ -5,8 +5,6 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 const zoomedOut=200;
 
 window.CESIUM_BASE_URL = '/static/Cesium/';
-// Your access token can be found at: https://ion.cesium.com/tokens.
-// This is the default access token from your ion account
 
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzZTdhZTAzYi0xMmU2LTQxMGEtYTUwYy1jYmFjMWU4MTJlMjQiLCJpZCI6MTgzMTUzLCJpYXQiOjE3MDE5NTk3MzN9.HujK24558HaTWySsqKTScmKfJKKclQ7JClfACFYMu2E';
 
@@ -15,29 +13,32 @@ const viewer = new Viewer('cesiumContainer', {
   terrain: Terrain.fromWorldTerrain(),
 });
 
-
 // Add Cesium OSM Buildings, a global 3D buildings layer.
 const buildingTileset = await createOsmBuildingsAsync();
 viewer.scene.primitives.add(buildingTileset);
 
+// Convert the camera coordinates to pixels
 function cesiumCoordsToPixel(longitude, latitude, globeWidth, globeHeight) {
   const x = (longitude + 180) * (globeWidth / 360);
   const y = (90 - latitude) * (globeHeight / 180);
   return { x, y };
 }
 
+// Convert the pixels to camera coordinates 
 function pixelToCesiumCoords(x, y, globeWidth, globeHeight) {
   const longitude = (x / globeWidth) * 360 - 180;
   const latitude = 90 - (y / globeHeight) * 180;
   return { longitude, latitude };
 }
 
+// Move the camera to the clicked location
 function flyToLocationInCesium(longitude, latitude) {
   viewer.camera.flyTo({
     destination: Cartesian3.fromDegrees(longitude, latitude,zoomedOut),
   });
 }
 
+// Move the arrow to the camera location
 function moveArrowToCesiumCameraPosition() {
   const cameraPositionCartographic = viewer.camera.positionCartographic;
 
@@ -55,7 +56,10 @@ function moveArrowToCesiumCameraPosition() {
   arrow.style.top = `${pixelCoords.y}px`;
 }
 
+//Listener if the camera moves
 viewer.camera.moveEnd.addEventListener(moveArrowToCesiumCameraPosition);
+
+// Listener if there's a click on the globe
 document.getElementById('globe').addEventListener('click', function (event) {
   const globeRect = this.getBoundingClientRect();
   const x = event.clientX - globeRect.left; // x position within the element.
